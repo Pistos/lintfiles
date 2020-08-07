@@ -1,19 +1,33 @@
+Layout/ExtraSpacing:
+  Enabled: false
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
 Layout/MultilineOperationIndentation:
   Enabled: false
 Layout/SpaceAfterNot:
   Enabled: false
 Layout/SpaceAroundOperators:
   Enabled: false
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: false
 Layout/SpaceInsideReferenceBrackets:
+  Enabled: false
+Lint/ParenthesesAsGroupedExpression:
   Enabled: false
 Lint/UnderscorePrefixedVariableName:
   Enabled: false
+Metrics/BlockLength:
+  Max: 30
+  Severity: warning
 Metrics/ClassLength:
   Max: 256
+  Severity: warning
 Metrics/LineLength:
   Max: 110
+  Severity: warning
 Metrics/MethodLength:
   Max: 30
+  Severity: warning
 Naming/BinaryOperatorParameterName:
   Enabled: false
 Naming/MemoizedInstanceVariableName:
@@ -39,6 +53,7 @@ Style/FrozenStringLiteralComment:
   Enabled: false
 Style/GlobalVars:
   AllowedVariables: ['$config', '$db']
+  Severity: warning
 Style/GuardClause:
   Enabled: false
 Style/IfUnlessModifier:
@@ -62,6 +77,8 @@ Style/RaiseArgs:
   Enabled: false
 Style/RedundantSelf:
   Enabled: false
+Style/StderrPuts:
+  Severity: warning
 Style/StringLiterals:
   Enabled: false
 Style/SymbolArray:
@@ -72,3 +89,5 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: 'consistent_comma'
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: 'consistent_comma'
+Style/WordArray:
+  Enabled: false
