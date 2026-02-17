@@ -1,43 +1,86 @@
+AllCops:
+  Exclude:
+    - 'tmp/**/*'
+    - '**/vendor/**/*'
+  NewCops: disable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.1
+Layout/CaseIndentation:
+  EnforcedStyle: 'end'
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
 Layout/ExtraSpacing:
   Enabled: false
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: 'consistent'
+Layout/HashAlignment:
+  Enabled: false
+Layout/LineLength:
+  Max: 120
+  Severity: info
 Layout/MultilineMethodCallIndentation:
   Enabled: false
 Layout/MultilineOperationIndentation:
+  Enabled: false
+Layout/SpaceAfterComma:
   Enabled: false
 Layout/SpaceAfterNot:
   Enabled: false
 Layout/SpaceAroundOperators:
   Enabled: false
+Layout/SpaceBeforeFirstArg:
+  Enabled: false
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: false
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
+Layout/SpaceInsideParens:
+  Enabled: false
+Layout/SpaceInsidePercentLiteralDelimiters:
+  Enabled: false
 Layout/SpaceInsideReferenceBrackets:
+  Enabled: false
+Layout/SpaceInsideStringInterpolation:
+  Enabled: false
+Lint/AmbiguousBlockAssociation:
   Enabled: false
 Lint/ParenthesesAsGroupedExpression:
   Enabled: false
 Lint/UnderscorePrefixedVariableName:
   Enabled: false
+Metrics/AbcSize:
+  Exclude:
+    - 'db/migrate/**/*'
 Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
   Max: 30
-  Severity: warning
+  Severity: info
 Metrics/ClassLength:
   Max: 256
-  Severity: warning
-Metrics/LineLength:
-  Max: 110
-  Severity: warning
+  Severity: info
 Metrics/MethodLength:
   Max: 30
-  Severity: warning
+  Severity: info
 Naming/BinaryOperatorParameterName:
   Enabled: false
 Naming/MemoizedInstanceVariableName:
   Enabled: false
+Naming/MethodParameterName:
+  AllowedNames: ['at', 'by', 'id', 'if', 'in', 'on', 's', 'to', 'x', 'y']
 Naming/FileName:
   Enabled: false
 Style/AccessModifierDeclarations:
   EnforcedStyle: 'inline'
 Style/BlockDelimiters:
   EnforcedStyle: 'semantic'
+  Exclude:
+    - 'db/seeds.rb'
+    - 'spec/factories/**/*'
 Style/ConditionalAssignment:
   EnforcedStyle: 'assign_inside_condition'
   IncludeTernaryExpressions: false
@@ -51,11 +94,16 @@ Style/FormatStringToken:
   Enabled: false
 Style/FrozenStringLiteralComment:
   Enabled: false
+Style/GlobalStdStream:
+  Severity: info
 Style/GlobalVars:
   AllowedVariables: ['$config', '$db']
-  Severity: warning
+  Severity: info
 Style/GuardClause:
   Enabled: false
+Style/HashSyntax:
+  EnforcedShorthandSyntax: always
+  Severity: info
 Style/IfUnlessModifier:
   Enabled: false
 Style/MultilineBlockChain:
@@ -66,7 +114,11 @@ Style/NegatedIf:
   Enabled: false
 Style/Next:
   Enabled: false
+Style/NumericLiterals:
+  Enabled: false
 Style/NumericPredicate:
+  Enabled: false
+Style/ParallelAssignment:
   Enabled: false
 Style/ParenthesesAroundCondition:
   AllowInMultilineConditions: true
@@ -75,10 +127,16 @@ Style/PercentLiteralDelimiters:
   Enabled: false
 Style/RaiseArgs:
   Enabled: false
+Style/RedundantParentheses:
+  Enabled: false
 Style/RedundantSelf:
   Enabled: false
+Style/SelfAssignment:
+  Severity: info
 Style/StderrPuts:
-  Severity: warning
+  Severity: info
+Style/StringConcatenation:
+  Enabled: false
 Style/StringLiterals:
   Enabled: false
 Style/SymbolArray:
