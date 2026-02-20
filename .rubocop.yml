@@ -7,6 +7,8 @@ AllCops:
   TargetRubyVersion: 3.1
 Layout/CaseIndentation:
   EnforcedStyle: 'end'
+Layout/EmptyLines:
+  Enabled: false
 Layout/EmptyLinesAroundBlockBody:
   Enabled: false
 Layout/EmptyLinesAroundClassBody:
@@ -29,6 +31,10 @@ Layout/MultilineOperationIndentation:
 Layout/SpaceAfterComma:
   Enabled: false
 Layout/SpaceAfterNot:
+  Enabled: false
+Layout/SpaceAroundKeyword:
+  Enabled: false
+Layout/SpaceAroundMethodCallOperator:
   Enabled: false
 Layout/SpaceAroundOperators:
   Enabled: false
@@ -61,7 +67,7 @@ Metrics/BlockLength:
   Max: 30
   Severity: info
 Metrics/ClassLength:
-  Max: 256
+  Max: 512
   Severity: info
 Metrics/MethodLength:
   Max: 30
@@ -88,6 +94,8 @@ Style/Documentation:
   Enabled: false
 Style/EmptyLiteral:
   Enabled: false
+Style/EmptyMethod:
+  Enabled: false
 Style/FormatString:
   Enabled: false
 Style/FormatStringToken:
@@ -106,11 +114,22 @@ Style/HashSyntax:
   Severity: info
 Style/IfUnlessModifier:
   Enabled: false
+Style/InvertibleUnlessCondition:
+  Enabled: true
+  Severity: info
+Style/KeywordParametersOrder:
+  Enabled: false
+Style/LineEndConcatenation:
+  Enabled: false
 Style/MultilineBlockChain:
   Enabled: false
 Style/MutableConstant:
   Enabled: false
 Style/NegatedIf:
+  Enabled: false
+Style/NegatedIfElseCondition:
+  Enabled: false
+Style/NegatedWhile:
   Enabled: false
 Style/Next:
   Enabled: false
@@ -121,8 +140,7 @@ Style/NumericPredicate:
 Style/ParallelAssignment:
   Enabled: false
 Style/ParenthesesAroundCondition:
-  AllowInMultilineConditions: true
-  AllowSafeAssignment: false
+  Enabled: false
 Style/PercentLiteralDelimiters:
   Enabled: false
 Style/RaiseArgs:
@@ -132,7 +150,7 @@ Style/RedundantParentheses:
 Style/RedundantSelf:
   Enabled: false
 Style/SelfAssignment:
-  Severity: info
+  Enabled: false
 Style/StderrPuts:
   Severity: info
 Style/StringConcatenation:
@@ -147,5 +165,13 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: 'consistent_comma'
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: 'consistent_comma'
+Style/TrailingUnderscoreVariable:
+  Enabled: false
+Style/TrivialAccessors:
+  Enabled: false
+Style/WhileUntilModifier:
+  Enabled: false
 Style/WordArray:
+  Enabled: false
+Style/YodaCondition:
   Enabled: false
