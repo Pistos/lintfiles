@@ -17,6 +17,7 @@
 # Supported linters (auto-detected from CWD):
 #   rubocop   — detected via .rubocop.yml
 #   eslint    — detected via .eslintrc.* or eslint.config.*
+#   stylelint — detected via .stylelintrc* or stylelint.config.*
 #
 # Works from any subdirectory (scopes to that subtree), and can live
 # anywhere on PATH (e.g. ~/bin) — always operates on CWD.
@@ -78,6 +79,14 @@ detect_linter() {
          [[ -f "$dir/eslint.config.ts" ]] || [[ -f "$dir/eslint.config.cjs" ]]; then
       echo "eslint"
       return
+    elif [[ -f "$dir/.stylelintrc" ]] || [[ -f "$dir/.stylelintrc.js" ]] || \
+         [[ -f "$dir/.stylelintrc.cjs" ]] || [[ -f "$dir/.stylelintrc.mjs" ]] || \
+         [[ -f "$dir/.stylelintrc.json" ]] || [[ -f "$dir/.stylelintrc.yml" ]] || \
+         [[ -f "$dir/.stylelintrc.yaml" ]] || [[ -f "$dir/.stylelintrc.ts" ]] || \
+         [[ -f "$dir/stylelint.config.js" ]] || [[ -f "$dir/stylelint.config.cjs" ]] || \
+         [[ -f "$dir/stylelint.config.mjs" ]] || [[ -f "$dir/stylelint.config.ts" ]]; then
+      echo "stylelint"
+      return
     fi
 
     # Stop at the repo root (or filesystem root if not in a repo).
@@ -101,6 +110,9 @@ lint_file() {
     eslint)
       npx eslint --format compact "$file" 2>/dev/null || true
       ;;
+    stylelint)
+      npx stylelint --formatter compact "$file" 2>/dev/null || true
+      ;;
   esac
 }
 
@@ -113,6 +125,9 @@ lint_stdin() {
       ;;
     eslint)
       npx eslint --format compact --stdin --stdin-filename "$file" 2>/dev/null || true
+      ;;
+    stylelint)
+      npx stylelint --formatter compact --stdin-filename "$file" 2>/dev/null || true
       ;;
   esac
 }
@@ -131,6 +146,11 @@ normalize() {
       # Output: Error - message (rule)
       grep -E '^.+: line [0-9]+, col [0-9]+, ' | sed -E 's/^.+: line [0-9]+, col [0-9]+, //' || true
       ;;
+    stylelint)
+      # Input:  /path/file.css: line 10, col 5, error - message (rule)
+      # Output: error - message (rule)
+      grep -E '^.+: line [0-9]+, col [0-9]+, ' | sed -E 's/^.+: line [0-9]+, col [0-9]+, //' || true
+      ;;
   esac
 }
 
@@ -144,6 +164,9 @@ is_relevant_file() {
       ;;
     eslint)
       [[ "$file" =~ \.(js|jsx|ts|tsx|mjs|cjs)$ ]]
+      ;;
+    stylelint)
+      [[ "$file" =~ \.(css|scss|sass|less|sss)$ ]]
       ;;
   esac
 }
