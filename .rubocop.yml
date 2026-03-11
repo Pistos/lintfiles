@@ -74,6 +74,8 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Max: 30
   Severity: info
+Metrics/ParameterLists:
+  CountKeywordArgs: false
 Naming/BinaryOperatorParameterName:
   Enabled: false
 Naming/MemoizedInstanceVariableName:
@@ -124,6 +126,8 @@ Style/KeywordParametersOrder:
 Style/LineEndConcatenation:
   Enabled: false
 Style/MultilineBlockChain:
+  Enabled: false
+Style/MultilineTernaryOperator:
   Enabled: false
 Style/MutableConstant:
   Enabled: false
