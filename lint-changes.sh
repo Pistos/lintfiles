@@ -19,12 +19,17 @@
 #   eslint    — detected via .eslintrc.* or eslint.config.*
 #   stylelint — detected via .stylelintrc* or stylelint.config.*
 #
+# If no config is found in the project, falls back to eslint.config.js
+# from the script's own directory.
+#
 # Works from any subdirectory (scopes to that subtree), and can live
 # anywhere on PATH (e.g. ~/bin) — always operates on CWD.
 #
 
 set -euo pipefail
 
+script_dir="${0:A:h}"
+eslint_extra_args=()
 show_all=false
 base_ref="HEAD"
 
@@ -96,6 +101,13 @@ detect_linter() {
 
     dir=$(dirname "$dir")
   done
+
+  # Fallback: use eslint config from the script's own directory.
+  if [[ -f "$script_dir/eslint.config.js" ]]; then
+    eslint_extra_args=(--config "$script_dir/eslint.config.js")
+    echo "eslint"
+    return
+  fi
 }
 
 # ── Linter operations ────────────────────────────────────────────
@@ -108,7 +120,7 @@ lint_file() {
       rubocop --format emacs --force-exclusion "$file" 2>/dev/null || true
       ;;
     eslint)
-      npx eslint --format compact "$file" 2>/dev/null || true
+      npx eslint "${eslint_extra_args[@]}" --format compact "$file" 2>/dev/null || true
       ;;
     stylelint)
       npx stylelint --formatter compact "$file" 2>/dev/null || true
@@ -124,7 +136,7 @@ lint_stdin() {
       rubocop --format emacs --force-exclusion --stdin "$file" 2>/dev/null || true
       ;;
     eslint)
-      npx eslint --format compact --stdin --stdin-filename "$file" 2>/dev/null || true
+      npx eslint "${eslint_extra_args[@]}" --format compact --stdin --stdin-filename "$file" 2>/dev/null || true
       ;;
     stylelint)
       npx stylelint --formatter compact --stdin-filename "$file" 2>/dev/null || true
@@ -204,6 +216,9 @@ if [[ ${#changed_files[@]} -eq 0 ]]; then
 fi
 
 echo "Linter: $linter"
+if [[ ${#eslint_extra_args[@]} -gt 0 ]]; then
+  echo "Config: ${eslint_extra_args[-1]} (fallback)"
+fi
 echo "Base: $base_ref"
 echo "Files: ${#changed_files[@]}"
 echo ""
