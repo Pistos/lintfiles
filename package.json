@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "@eslint/js": "^9.0.0",
+    "@stylistic/eslint-plugin": "^5.0.0",
+    "eslint-plugin-perfectionist": "^5.0.0",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.5.0",
+    "globals": "^17.0.0",
+    "typescript-eslint": "^8.0.0"
+  },
+  "description": "Shared ESLint flat config for JS/TS projects",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "name": "@lintfiles/eslint-config",
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "type": "module",
+  "version": "1.0.0"
+}
