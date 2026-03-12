@@ -10,10 +10,12 @@
   },
   "description": "Shared ESLint flat config for JS/TS projects",
   "exports": {
-    ".": "./index.js"
+    ".": "./index.js",
+    "./react": "./index.react.js"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "index.react.js"
   ],
   "name": "@lintfiles/eslint-config",
   "peerDependencies": {

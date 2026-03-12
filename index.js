@@ -1,9 +1,6 @@
 import js from '@eslint/js'
-import globals from 'globals'
 
 import perfectionist from 'eslint-plugin-perfectionist'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import stylistic from '@stylistic/eslint-plugin'
 
 import typescriptEslint from 'typescript-eslint'
@@ -14,13 +11,10 @@ export default [
     extends: [
       js.configs.recommended,
       perfectionist.configs['recommended-alphabetical'],
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
       typescriptEslint.configs.recommended,
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
     },
     plugins: {
       '@stylistic': stylistic,
@@ -39,7 +33,6 @@ export default [
           'specialCharacters': 'trim',
         },
       ],
-      'perfectionist/sort-jsx-props': 'warn',
       'perfectionist/sort-objects': [
         'warn',
         {
@@ -71,10 +64,6 @@ export default [
         },
       ],
       '@stylistic/eol-last': 'warn',
-      '@stylistic/jsx-closing-bracket-location': 'warn',
-      '@stylistic/jsx-first-prop-new-line': 'warn',
-      '@stylistic/jsx-indent-props': ['warn', 2],
-      '@stylistic/jsx-max-props-per-line': ['warn', {'maximum': 1, 'when': 'multiline'}],
       '@stylistic/max-len': ['warn', {'code': 160, 'ignoreComments': false}],
       '@stylistic/max-statements-per-line': ['error', {'max': 2}],
       '@stylistic/newline-per-chained-call': ['warn', {'ignoreChainWithDepth': 2}],
