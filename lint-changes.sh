@@ -14,12 +14,12 @@
 # BASE_REF defaults to HEAD (compare working tree against last commit).
 # Can be any git ref: branch name, commit hash, HEAD~3, etc.
 #
-# Supported linters (auto-detected from CWD):
+# Supported linters (all applicable linters run, auto-detected from CWD):
 #   rubocop   — detected via .rubocop.yml
 #   eslint    — detected via .eslintrc.* or eslint.config.*
 #   stylelint — detected via .stylelintrc* or stylelint.config.*
 #
-# If no config is found in the project, falls back to eslint.config.js
+# If no eslint config is found in the project, falls back to eslint.config.js
 # from the script's own directory.
 #
 # Works from any subdirectory (scopes to that subtree), and can live
@@ -66,32 +66,39 @@ done
 
 # ── Linter detection ─────────────────────────────────────────────
 
-# Search CWD and ancestor directories (up to the repo root) for a linter config.
-detect_linter() {
-  local repo_root
+# Search CWD and ancestor directories (up to the repo root) for linter configs.
+# Populates the `detected_linters` array with all linters found.
+detect_linters() {
+  local repo_root dir
   repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
-  local dir
   dir=$(pwd)
 
+  local found_eslint=false
+  local found_rubocop=false
+  local found_stylelint=false
+
   while true; do
-    if [[ -f "$dir/.rubocop.yml" ]]; then
-      echo "rubocop"
-      return
-    elif [[ -f "$dir/.eslintrc.js" ]] || [[ -f "$dir/.eslintrc.json" ]] || \
+    if ! $found_eslint; then
+      if [[ -f "$dir/.eslintrc.js" ]] || [[ -f "$dir/.eslintrc.json" ]] || \
          [[ -f "$dir/.eslintrc.yml" ]] || [[ -f "$dir/.eslintrc.yaml" ]] || \
          [[ -f "$dir/.eslintrc.cjs" ]] || \
          [[ -f "$dir/eslint.config.js" ]] || [[ -f "$dir/eslint.config.mjs" ]] || \
          [[ -f "$dir/eslint.config.ts" ]] || [[ -f "$dir/eslint.config.cjs" ]]; then
-      echo "eslint"
-      return
-    elif [[ -f "$dir/.stylelintrc" ]] || [[ -f "$dir/.stylelintrc.js" ]] || \
+        found_eslint=true
+      fi
+    fi
+    if ! $found_rubocop && [[ -f "$dir/.rubocop.yml" ]]; then
+      found_rubocop=true
+    fi
+    if ! $found_stylelint; then
+      if [[ -f "$dir/.stylelintrc" ]] || [[ -f "$dir/.stylelintrc.js" ]] || \
          [[ -f "$dir/.stylelintrc.cjs" ]] || [[ -f "$dir/.stylelintrc.mjs" ]] || \
          [[ -f "$dir/.stylelintrc.json" ]] || [[ -f "$dir/.stylelintrc.yml" ]] || \
          [[ -f "$dir/.stylelintrc.yaml" ]] || [[ -f "$dir/.stylelintrc.ts" ]] || \
          [[ -f "$dir/stylelint.config.js" ]] || [[ -f "$dir/stylelint.config.cjs" ]] || \
          [[ -f "$dir/stylelint.config.mjs" ]] || [[ -f "$dir/stylelint.config.ts" ]]; then
-      echo "stylelint"
-      return
+        found_stylelint=true
+      fi
     fi
 
     # Stop at the repo root (or filesystem root if not in a repo).
@@ -103,11 +110,15 @@ detect_linter() {
   done
 
   # Fallback: use eslint config from the script's own directory.
-  if [[ -f "$script_dir/eslint.config.js" ]]; then
+  if ! $found_eslint && [[ -f "$script_dir/eslint.config.js" ]]; then
     eslint_extra_args=(--config "$script_dir/eslint.config.js")
-    echo "eslint"
-    return
+    found_eslint=true
   fi
+
+  detected_linters=()
+  if $found_eslint; then detected_linters+=(eslint); fi
+  if $found_rubocop; then detected_linters+=(rubocop); fi
+  if $found_stylelint; then detected_linters+=(stylelint); fi
 }
 
 # ── Linter operations ────────────────────────────────────────────
@@ -175,7 +186,7 @@ is_relevant_file() {
         [[ "$(basename "$file")" =~ ^(Gemfile|Rakefile)$ ]]
       ;;
     eslint)
-      [[ "$file" =~ \.(js|jsx|ts|tsx|mjs|cjs)$ ]]
+      [[ "$file" =~ \.(js|jsx|ts|tsx|mjs|cjs|vue)$ ]]
       ;;
     stylelint)
       [[ "$file" =~ \.(css|scss|sass|less|sss)$ ]]
@@ -185,8 +196,8 @@ is_relevant_file() {
 
 # ── Main ──────────────────────────────────────────────────────────
 
-linter=$(detect_linter)
-if [[ -z "$linter" ]]; then
+detect_linters
+if [[ ${#detected_linters[@]} -eq 0 ]]; then
   echo "No supported linter configuration found." >&2
   exit 1
 fi
@@ -196,12 +207,11 @@ fi
 # list use CWD-relative paths, so this bridges the two.
 git_prefix=$(git rev-parse --show-prefix 2>/dev/null)
 
-# Gather changed files: tracked changes + untracked new files.
-# --relative and "-- ." scope results to the current subtree with CWD-relative paths.
-changed_files=()
+# Gather all changed files once; each linter filters for its relevant extensions.
+all_changed_files=()
 while IFS= read -r file; do
-  if [[ -n "$file" ]] && is_relevant_file "$file"; then
-    changed_files+=("$file")
+  if [[ -n "$file" ]]; then
+    all_changed_files+=("$file")
   fi
 done < <(
   {
@@ -210,80 +220,90 @@ done < <(
   } | sort -u
 )
 
-if [[ ${#changed_files[@]} -eq 0 ]]; then
-  echo "No changed $linter-relevant files found (vs $base_ref)."
-  exit 0
-fi
-
-echo "Linter: $linter"
-if [[ ${#eslint_extra_args[@]} -gt 0 ]]; then
-  echo "Config: ${eslint_extra_args[-1]} (fallback)"
-fi
+echo "Linters: ${detected_linters[*]}"
 echo "Base: $base_ref"
-echo "Files: ${#changed_files[@]}"
 echo ""
 
 total_new=0
 files_with_issues=0
 
-for file in "${changed_files[@]}"; do
-  new_raw=$(lint_file "$file")
+for linter in "${detected_linters[@]}"; do
+  changed_files=()
+  for file in "${all_changed_files[@]}"; do
+    if is_relevant_file "$file"; then
+      changed_files+=("$file")
+    fi
+  done
 
-  # No issues in the current version — nothing to report.
-  if [[ -z "$new_raw" ]]; then
+  if [[ ${#changed_files[@]} -eq 0 ]]; then
     continue
   fi
 
-  # In --all mode, show every issue without diffing.
-  if $show_all; then
-    echo "=== $file ==="
-    echo "$new_raw"
-    echo ""
-    count=$(echo "$new_raw" | wc -l)
-    total_new=$((total_new + count))
-    files_with_issues=$((files_with_issues + 1))
-    continue
+  echo "── $linter (${#changed_files[@]} file(s)) ──"
+  if [[ "$linter" == "eslint" ]] && [[ ${#eslint_extra_args[@]} -gt 0 ]]; then
+    echo "Config: ${eslint_extra_args[-1]} (fallback)"
   fi
+  echo ""
 
-  # Lint the old version for comparison.
-  # git show needs repo-root-relative paths; the linter gets CWD-relative paths.
-  if git cat-file -e "${base_ref}:${git_prefix}${file}" 2>/dev/null; then
-    old_raw=$(git show "${base_ref}:${git_prefix}${file}" | lint_stdin "$file")
-  else
-    # File is new — all issues are new.
-    old_raw=""
-  fi
+  for file in "${changed_files[@]}"; do
+    new_raw=$(lint_file "$file")
 
-  # If no old issues exist, everything current is new.
-  if [[ -z "$old_raw" ]]; then
-    echo "=== $file ==="
-    echo "$new_raw"
-    echo ""
-    count=$(echo "$new_raw" | wc -l)
-    total_new=$((total_new + count))
-    files_with_issues=$((files_with_issues + 1))
-    continue
-  fi
+    # No issues in the current version — nothing to report.
+    if [[ -z "$new_raw" ]]; then
+      continue
+    fi
 
-  # Normalize both outputs and find issues only in the new version.
-  # LC_ALL=C ensures consistent sort/comm behavior across locales.
-  new_norm=$(echo "$new_raw" | normalize | LC_ALL=C sort)
-  old_norm=$(echo "$old_raw" | normalize | LC_ALL=C sort)
-  new_only=$(LC_ALL=C comm -13 <(echo "$old_norm") <(echo "$new_norm") | grep -v '^$' || true)
+    # In --all mode, show every issue without diffing.
+    if $show_all; then
+      echo "=== $file ==="
+      echo "$new_raw"
+      echo ""
+      count=$(echo "$new_raw" | wc -l)
+      total_new=$((total_new + count))
+      files_with_issues=$((files_with_issues + 1))
+      continue
+    fi
 
-  if [[ -n "$new_only" ]]; then
-    echo "=== $file ==="
-    while IFS= read -r norm_line; do
-      [[ -z "$norm_line" ]] && continue
-      matched=$(grep -F -- "$norm_line" <<< "$new_raw" | head -1)
-      if [[ -n "$matched" ]]; then
-        echo "$matched"
-        total_new=$((total_new + 1))
-      fi
-    done <<< "$new_only"
-    echo ""
-    files_with_issues=$((files_with_issues + 1))
-  fi
+    # Lint the old version for comparison.
+    # git show needs repo-root-relative paths; the linter gets CWD-relative paths.
+    if git cat-file -e "${base_ref}:${git_prefix}${file}" 2>/dev/null; then
+      old_raw=$(git show "${base_ref}:${git_prefix}${file}" | lint_stdin "$file")
+    else
+      # File is new — all issues are new.
+      old_raw=""
+    fi
+
+    # If no old issues exist, everything current is new.
+    if [[ -z "$old_raw" ]]; then
+      echo "=== $file ==="
+      echo "$new_raw"
+      echo ""
+      count=$(echo "$new_raw" | wc -l)
+      total_new=$((total_new + count))
+      files_with_issues=$((files_with_issues + 1))
+      continue
+    fi
+
+    # Normalize both outputs and find issues only in the new version.
+    # LC_ALL=C ensures consistent sort/comm behavior across locales.
+    new_norm=$(echo "$new_raw" | normalize | LC_ALL=C sort)
+    old_norm=$(echo "$old_raw" | normalize | LC_ALL=C sort)
+    new_only=$(LC_ALL=C comm -13 <(echo "$old_norm") <(echo "$new_norm") | grep -v '^$' || true)
+
+    if [[ -n "$new_only" ]]; then
+      echo "=== $file ==="
+      while IFS= read -r norm_line; do
+        [[ -z "$norm_line" ]] && continue
+        matched=$(grep -F -- "$norm_line" <<< "$new_raw" | head -1)
+        if [[ -n "$matched" ]]; then
+          echo "$matched"
+          total_new=$((total_new + 1))
+        fi
+      done <<< "$new_only"
+      echo ""
+      files_with_issues=$((files_with_issues + 1))
+    fi
+  done
 done
 
 echo "---"
