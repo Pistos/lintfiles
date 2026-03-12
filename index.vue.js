@@ -1,6 +1,7 @@
 import globals from 'globals'
 
 import vue from 'eslint-plugin-vue'
+import typescriptEslint from 'typescript-eslint'
 
 import baseConfig from './index.js'
 
@@ -11,6 +12,9 @@ export default [
     files: ['**/*.vue'],
     languageOptions: {
       globals: globals.browser,
+      parserOptions: {
+        parser: typescriptEslint.parser,
+      },
     },
   },
 ]
